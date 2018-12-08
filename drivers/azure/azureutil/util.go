@@ -32,14 +32,18 @@ func randomString(n int, alphabet string) string {
 
 // imageName holds various components of an OS image name identifier
 type imageName struct{ publisher, offer, sku, version string }
-
-// parseImageName parses a publisher:offer:sku:version into those parts.
+ 
+// parseImageName parses as publisher:offer:sku:version into those parts or /subscriptions/<subscription>/resourceGroups/<resource-group>/providers/Microsoft.Compute/images/<image>
 func parseImageName(image string) (imageName, error) {
-	l := strings.Split(image, ":")
-	if len(l) != 4 {
-		return imageName{}, fmt.Errorf("image name %q not a valid format", image)
-	}
-	return imageName{l[0], l[1], l[2], l[3]}, nil
+    if l := strings.Split(image, ":"); len(l) == 4 {
+        return imageName{l[0], l[1], l[2], l[3]}, nil
+    }
+    else if l = strings.Split(image,"/"); len(l) == 8 {
+        return imageName{l[0],l[1],l[2],l[3],l[4],l[5],l[6],l[7]}, nil
+    }
+    else {
+        return imageName{}, fmt.Errorf("image name %q not a valid format", image)
+    }
 }
 
 func timeSeed() *rand.Rand { return rand.New(rand.NewSource(time.Now().UTC().UnixNano())) }
